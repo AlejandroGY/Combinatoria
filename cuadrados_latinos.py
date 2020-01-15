@@ -22,36 +22,26 @@ class Graph:
 				result += 1
 		return result, matchR
 
-
-
 if __name__ == "__main__":
    size_square = int(input( ))
 
-   latin_square = [[0] * (size_square + 1) for i in range(0, size_square + 1)]
+   latin_square = [[0] * (size_square) for i in range(0, size_square)]
    for i in range(0, 2 * size_square):
       r, c, e = map(int, input( ).split( ))
-      latin_square[r][c] = e
+      latin_square[r - 1][c - 1] = e
    print(latin_square)
 
-   # bpGraph = [
-   #    [0, 1, 1, 0, 0, 0],
-   #    [1, 0, 0, 1, 0, 0],
-   #    [0, 0, 1, 0, 0, 0],
-   #    [0, 0, 1, 1, 0, 0],
-   #    [0, 0, 0, 0, 0, 1],
-   #    [0, 0, 0, 0, 1, 1]
-   # ]
+   for t in range(2, size_square):
+      bpGraph = [[1] * (size_square) for i in range(0, size_square)]
+      for j in range(0, size_square):
+         for i in range(0, size_square):
+            if latin_square[i][j] != 0:
+               bpGraph[latin_square[i][j] - 1][j] = 0
 
-   bpGraph = [[1] * (size_square + 1) for i in range(0, size_square + 1)]
-    for j in range(1, size_square + 1):
-      for i in range(1, size_square + 1):
-         if latin_square[i][j] != 0:
-            bpGraph[i][j] = 0
+      g = Graph(bpGraph)
+      res = g.maxBPM( )
+      for i in range(0, size_square):
+         latin_square[t][i] = res[1][i] + 1
 
-   print(bpGraph)
-
-   g = Graph(bpGraph)
-   res = g.maxBPM( )
-   print(res[0])
-   print(res[1])
-   
+   for i in range(0, size_square):
+      print(latin_square[i])
