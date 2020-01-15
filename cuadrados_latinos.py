@@ -38,10 +38,10 @@ if __name__ == "__main__":
             if latin_square[i][j] != 0:
                bpGraph[latin_square[i][j] - 1][j] = 0
 
-      g = Graph(bpGraph)
-      res = g.maxBPM( )
+      graph = Graph(bpGraph)
+      matching = graph.maxBPM( )
       for i in range(0, size_square):
-         latin_square[t][i] = res[1][i] + 1
+         latin_square[t][i] = matching[1][i] + 1
 
    for i in range(0, size_square):
       print(latin_square[i])
