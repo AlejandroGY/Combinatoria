@@ -1,0 +1,36 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{vmargin}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+
+\setpapersize{A4}
+\setmargins{2.5cm} % margen izquierdo
+{1.5cm} % margen superior
+{16.5cm} % anchura del texto
+{23.42cm} % altura del texto
+{10pt} % altura de los encabezados
+{1cm} % espacio entre el texto y los encabezados
+{0pt} % altura del pie de página
+{2cm} % espacio entre el texto y el pie de página
+
+\lhead{Rubén Alejandro González Yáñez}
+\rhead{2143069767}
+% \rhead{\includegraphics[width=1cm]{example-image-a}}
+\cfoot{} % quitar número de página del centro
+\rfoot{\thepage} % número de página a la derecha
+\pagestyle{fancy}
+
+%\includegraphics[scale=0.5]{s1.JPG}
+
+%Seccion numerada como la necesito
+\newcommand{\mysection}[2]{\setcounter{section}{#1}\addtocounter{section}{-1}\section{}}
+
+
+\begin{document}
+    \mysection{17}{Seccion}
+\end{document}
+
