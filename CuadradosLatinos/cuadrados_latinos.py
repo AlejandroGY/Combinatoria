@@ -25,11 +25,22 @@ class Graph:
 if __name__ == "__main__":
    size_square = int(input( ))
 
+   accountant = [[0] * 2 for i in range(0, size_square)]
+   for i in range(0, size_square):
+      accountant[i][1] = i
+
    latin_square = [[0] * (size_square) for i in range(0, size_square)]
    for i in range(0, 2 * size_square):
       r, c, e = map(int, input( ).split( ))
       latin_square[r - 1][c - 1] = e
-   print(latin_square)
+      accountant[r - 1][0] += 1
+
+   accountant.sort(reverse = True)
+   print(accountant)
+   
+   print("\nCuadrado Inicial:")
+   for i in range(0, size_square):
+      print(latin_square[i])
 
    for t in range(2, size_square):
       bpGraph = [[1] * (size_square) for i in range(0, size_square)]
@@ -44,6 +55,6 @@ if __name__ == "__main__":
       for i in range(0, size_square):
          latin_square[t][i] = matching[1][i] + 1
 
-   print()
+   print("\nCuadrado Resuelto:")
    for i in range(0, size_square):
       print(latin_square[i])
