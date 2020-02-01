@@ -24,13 +24,11 @@ class Graph:
 
 if __name__ == "__main__":
    size_square = int(input( ))
+   number_elements = int(input( ))
 
-   accountant = [[0] * 2 for i in range(0, size_square)]
-   for i in range(0, size_square):
-      accountant[i][1] = i
-
+   accountant = [[0, i] for i in range(0, size_square)]
    latin_square = [[0] * (size_square) for i in range(0, size_square)]
-   for i in range(0, 2 * size_square):
+   for i in range(0, number_elements):
       r, c, e = map(int, input( ).split( ))
       latin_square[r - 1][c - 1] = e
       accountant[r - 1][0] += 1
@@ -42,18 +40,24 @@ if __name__ == "__main__":
    for i in range(0, size_square):
       print(latin_square[i])
 
-   for t in range(2, size_square):
-      bpGraph = [[1] * (size_square) for i in range(0, size_square)]
-      for j in range(0, size_square):
-         for i in range(0, size_square):
-            if latin_square[i][j] != 0:
-               bpGraph[latin_square[i][j] - 1][j] = 0
+   for t in accountant:
+      if t[0] != 0:
+         bpGraph = [[1] * (size_square) for i in range(0, size_square)]
+         for j in range(0, size_square):
+            if latin_square[t[1]][j] != 0:
+               for i in range(0, size_square):
+                  bpGraph[i][j] = 0
+               for i in range(0, size_square):
+                  bpGraph[latin_square[t[1]][j] - 1][i] = 0
 
-      graph = Graph(bpGraph)
-      matching = graph.maxBPM( )
-      print(matching)
-      for i in range(0, size_square):
-         latin_square[t][i] = matching[1][i] + 1
+         graph = Graph(bpGraph)
+         matching = graph.maxBPM( )
+         
+         print(bpGraph)
+         print(matching)
+         for i in range(0, size_square):
+            if matching[1][i] != -1:
+               latin_square[t[1]][i] = matching[1][i] + 1
 
    print("\nCuadrado Resuelto:")
    for i in range(0, size_square):
