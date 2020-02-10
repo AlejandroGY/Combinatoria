@@ -22,40 +22,64 @@ class Grafo:
             resultado += 1
       return resultado, acoplamiento_
 
-def resuelve_1(matriz, acumulado, tam):
+def imprime(cuadrado, tam):
+   print("Temp:")
+   for i in range(0, tam):
+      print(cuadrado[i])
+
+def lemma_1(cuadrado, acumulado, tam):
+   for actual in acumulado:
+      print(actual)
+      if actual[0] == 0:
+         adyacencia = [[1] * (tam) for i in range(0, tam)]
+         for j in range(0, tam):
+            for i in range(0, tam):
+               if cuadrado[i][j] != 0:
+                  adyacencia[cuadrado[i][j] - 1][j] = 0
+         imprime(adyacencia, tam)
+         grafo = Grafo(adyacencia)
+         acoplamiento = grafo.maxBPM( )
+         for i in range(0, tam):
+            cuadrado[actual[1]][i] = acoplamiento[1][i] + 1
+   return cuadrado
+
+def lemma_2(cuadrado, acumulado, tam):
+   index = 0
+   acumulado_temp = acumulado
    for actual in acumulado:
       adyacencia = [[1] * (tam) for i in range(0, tam)]
       if actual[0] != 0:
          for j in range(0, tam):
-            if matriz[actual[1]][j] != 0:
+            if cuadrado[actual[1]][j] != 0:
                for i in range(0, tam):
                   adyacencia[i][j] = 0
                for i in range(0, tam):
-                  adyacencia[matriz[actual[1]][j] - 1][i] = 0
-      else:
-         for j in range(0, tam):
-            for i in range(0, tam):
-               if matriz[i][j] != 0:
-                  adyacencia[matriz[i][j] - 1][j] = 0
+                  adyacencia[cuadrado[actual[1]][j] - 1][i] = 0
+            else:
+               for i in range(0, tam):
+                  if cuadrado[i][j] != 0:
+                     adyacencia[cuadrado[i][j] - 1][j] = 0
 
-      grafo = Grafo(adyacencia)
-      acoplamiento = grafo.maxBPM( )
-      
-      print()
-      print(adyacencia)
-      print(acoplamiento)
-      for i in range(0, tam):
-         if acoplamiento[1][i] != -1:
-            matriz[actual[1]][i] = acoplamiento[1][i] + 1
-   return matriz
+         grafo = Grafo(adyacencia)
+         acoplamiento = grafo.maxBPM( )
+         
+         imprime(adyacencia, tam)
+         print(acoplamiento)
+         for i in range(0, tam):
+            if acoplamiento[1][i] != -1:
+               cuadrado[actual[1]][i] = acoplamiento[1][i] + 1
+         imprime(cuadrado, tam)
+         acumulado_temp[index][0] = tam
+      index += 1
+   return cuadrado, acumulado_temp
 
 if __name__ == "__main__":
    tam, n = map(int, input( ).split( ))
    acumulado = [[0, i] for i in range(0, tam)]
-   matriz = [[0] * (tam) for i in range(0, tam)]
+   cuadrado = [[0] * (tam) for i in range(0, tam)]
    for i in range(0, n):
       r, c, e = map(int, input( ).split( ))
-      matriz[r - 1][c - 1] = e
+      cuadrado[r - 1][c - 1] = e
       acumulado[r - 1][0] += 1
 
    acumulado.sort(reverse = True)
@@ -63,9 +87,11 @@ if __name__ == "__main__":
    
    print("\nCuadrado Inicial:")
    for i in range(0, tam):
-      print(matriz[i])
+      print(cuadrado[i])
 
-   cuadrado_latino = resuelve_1(matriz, acumulado, tam)
+   cuadrado_latino, acumulado = lemma_2(cuadrado, acumulado, tam)
+   print(acumulado)
+   cuadrado_latino = lemma_1(cuadrado_latino, acumulado, tam)
 
    print("\nCuadrado Resuelto:")
    for i in range(0, tam):
