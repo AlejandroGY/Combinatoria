@@ -36,9 +36,11 @@ def lemma_1(cuadrado, acumulado, tam):
             for i in range(0, tam):
                if cuadrado[i][j] != 0:
                   adyacencia[cuadrado[i][j] - 1][j] = 0
+         
          imprime(adyacencia, tam)
          grafo = Grafo(adyacencia)
          acoplamiento = grafo.maxBPM( )
+         
          for i in range(0, tam):
             cuadrado[actual[1]][i] = acoplamiento[1][i] + 1
    return cuadrado
