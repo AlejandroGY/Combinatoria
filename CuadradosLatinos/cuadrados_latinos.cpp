@@ -192,5 +192,4 @@ int main( ) {
 	//imprime(cuadrado);
 	//lemma_1(cuadrado, acumulado, tam);
 	//imprime(cuadrado);
-/**/
 }
