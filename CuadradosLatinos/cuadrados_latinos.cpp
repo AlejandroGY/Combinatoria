@@ -13,8 +13,8 @@ struct vector2d : public std::vector<std::vector<T>> {
    }
 };
 
-bool bpm(vector2d<bool>& grafo, int u, bool visto[], int acoplamiento_[], int n) {
-	for (int v = 0; v < n; v++) {
+bool bpm(vector2d<bool>& grafo, int u, std::vector<bool>& visto, std::vector<int>& acoplamiento_, int n) {
+	for (int v = 0; v < n; ++v) {
 		if (grafo[u][v] && !visto[v]) {
 			visto[v] = true;
 			if (acoplamiento_[v] < 0 || bpm(grafo, acoplamiento_[v], visto, acoplamiento_, n)) {
@@ -26,22 +26,19 @@ bool bpm(vector2d<bool>& grafo, int u, bool visto[], int acoplamiento_[], int n)
 	return false;
 }
 
-int maxBPM(vector2d<bool>& grafo, int n) {
-	int acoplamiento_[n];
-   std::fill(acoplamiento_, acoplamiento_ + n, -1);
-
-	int result = 0;
-	for (int u = 0; u < n; u++) {
-		bool visto[n];
-		std::fill(visto, visto + n, false);
+int maxBPM(vector2d<bool>& grafo, std::vector<int>& acoplamiento_, int n) {
+	int res = 0;
+	for (int u = 0; u < n; ++u) {
+		std::vector<bool> visto(n, false);
 		if (bpm(grafo, u, visto, acoplamiento_, n)) {
-         result++;
+         res++;
       }
 	}
-	return result;
+	return res;
 }
 
-void imprime(vector2d<int>& cuadrado, int tam) {
+template<typename T>
+void imprime(T cuadrado, int tam) {
    std::cout << "Temp:\n";
 	for (int i = 0; i < tam; ++i) {
 		for (int j = 0; j < tam; ++j) {
@@ -51,37 +48,43 @@ void imprime(vector2d<int>& cuadrado, int tam) {
 	}
 }
 
-def lemma_1(cuadrado, acumulado, tam):
-   for actual in acumulado:
-      print(actual)
-      if actual[0] == 0:
-         adyacencia = [[1] * (tam) for i in range(0, tam)]
-         for j in range(0, tam):
-            for i in range(0, tam):
-               if cuadrado[i][j] != 0:
-                  adyacencia[cuadrado[i][j] - 1][j] = 0
+void lemma_1(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam) {
+   int index = 0;
+	for (auto& actual : acumulado) {
+      if (actual.first == 0) {
+			vector2d<bool> adyacencia(tam, 1);
+         for (int j = 0; j < tam; ++j) {
+            for (int i = 0; i < tam; ++i) {
+               if (cuadrado[i][j] != 0) {
+						adyacencia[cuadrado[i][j] - 1][j] = 0;
+					}
+				}
+			}
          
-         #imprime(adyacencia, tam)
-         grafo = Grafo(adyacencia)
-         acoplamiento = grafo.maxBPM( )
-         
-         for i in range(0, tam):
-            cuadrado[actual[1]][i] = acoplamiento[1][i] + 1
-   return cuadrado
+			//imprime(adyacencia, tam);
+			std::vector<int> acoplamiento(tam, -1);
+			int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
+         for (int i = 0; i < tam; ++i) {
+				cuadrado[actual.second][i] = acoplamiento[i] + 1;
+			}
+			acumulado[index].first = tam;
+		}
+		index += 1;
+	}
+}
 
 void lemma_2(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam) {
-   int index = 0
-   for (auto actual : acumulado) {
-		vector2d<bool> adyacencia(tam);
-      std::fill()
-      if (actual[0] != 0) {
+   int index = 0;
+   for (auto& actual : acumulado) {
+		vector2d<bool> adyacencia(tam, 1);
+      if (actual.first != 0) {
          for (int j = 0; j < tam; ++j) {
-            if (cuadrado[actual[1]][j] != 0) {
+            if (cuadrado[actual.second][j] != 0) {
                for (int i = 0; i < tam; ++i) {
 						adyacencia[i][j] = 0;
 					}
                for (int i = 0; i < tam; ++i) {
-						adyacencia[cuadrado[actual[1]][j] - 1][i] = 0;
+						adyacencia[cuadrado[actual.second][j] - 1][i] = 0;
 					}
 				} else {
                for (int i = 0; i < tam; ++i) {
@@ -92,38 +95,32 @@ void lemma_2(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulad
 				}
 			}
 
-         grafo = Grafo(adyacencia)
-         acoplamiento = grafo.maxBPM( )
+         std::vector<int> acoplamiento(tam, -1);
+			int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
          
-         #imprime(adyacencia, tam)
-         #print(acoplamiento)
-         for i in range(0, tam):
-            if acoplamiento[1][i] != -1:
-               cuadrado[actual[1]][i] = acoplamiento[1][i] + 1
-         #imprime(cuadrado, tam)
-         acumulado_temp[index][0] = tam;
+         //imprime(adyacencia, tam);
+         for (int i = 0; i < tam; ++i) {
+            if (acoplamiento[i] != -1) {
+					cuadrado[actual.second][i] = acoplamiento[i] + 1;
+				}
+			}
+         //imprime(cuadrado, tam);
+         acumulado[index].first = tam;
 		}
       index += 1;
 	}
 }
 
-def permutar_filas_columnas(cuadrado, acumulado, tam, pos_elemento_unico):
-   anterior = 0
-   for i in range(0, tam):
-      if acumulado[i][1] == pos_elemento_unico:
-         anterior = acumulado[i][0]
-         break
-   columnas_finales = [anterior]
-
-   anterior += 1
-   for i in range(0, tam):
-      if acumulado[i][1] != pos_elemento_unico and acumulado[i][0] != 0:
-         columnas_finales.append(anterior + acumulado[i][0])
-         anterior += acumulado[i][0]
-
-   print("Columnas")
-   print(columnas_finales)
-   return cuadrado
+void permutar_filas_columnas(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int pos_elemento_unico) {
+   int anterior = 1 + (std::lower_bound(acumulado.begin( ), acumulado.end( ), std::make_pair(0, pos_elemento_unico))->first);
+	std::vector<int> columnas_finales = { anterior - 1 };
+   for (int i = 0; i < tam; ++i) {
+		if (acumulado[i].second != pos_elemento_unico && acumulado[i].first != 0) {
+			columnas_finales.push_back(anterior + acumulado[i].first);
+         anterior += acumulado[i].first;
+		}
+	}
+}
 
 void teorema(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam) {
 
@@ -160,7 +157,7 @@ int main( ) {
 		}
 	}
 
-	int pos_elemento_unico = std::find(elementos_vistos.begin( ), elementos_vistos.end( ), 1) - elementos_vistos.begin( ) + 1;
+	int pos_elemento_unico = std::find(elementos_vistos.begin( ), elementos_vistos.end( ), 1) - elementos_vistos.begin( );
 	std::sort(acumulado.begin( ), acumulado.end( ), std::greater<std::pair<int, int>>( ));
 
 	for (int i = 0; i < tam; ++i) {
@@ -168,4 +165,11 @@ int main( ) {
 	}
 	std::cout << "\nPos: " << pos_elemento_unico << "\n";
 
+	permutar_filas_columnas(cuadrado, acumulado, tam, pos_elemento_unico);
+
+	//imprime(cuadrado, tam);
+	//lemma_2(cuadrado, acumulado, tam);
+	//imprime(cuadrado, tam);
+	//lemma_1(cuadrado, acumulado, tam);
+	//imprime(cuadrado, tam);
 }
