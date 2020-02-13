@@ -113,17 +113,17 @@ void lemma_2(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulad
 }
 
 void permutar_filas_columnas(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int pos_elemento_unico) {
+	std::sort(acumulado.begin( ), acumulado.end( ));
 	for (auto act : acumulado) {
 		std::cout << act.first << " " << act.second << "+\n";
 	}
-
-	std::sort(acumulado.begin( ), acumulado.end( ));
+	std::cout << "\n";
 	auto it = (std::lower_bound(acumulado.begin( ), acumulado.end( ), std::make_pair(0, pos_elemento_unico), [](const auto& a, const auto& b) {
 		return (a.second > b.second);
 	}));
    
 	int anterior = 1 + it->first;
-	std::cerr << it->second << " que obtengo\n";
+	std::cerr << "Obtuve:" << it->second << "\n";
 	std::vector<int> columnas_finales = { anterior - 1 };
    for (int i = 0; i < tam; ++i) {
 		if (acumulado[i].second != it->second && acumulado[i].first != 0) {
@@ -154,6 +154,7 @@ int main( ) {
 	for (auto act : acumulado) {
 		std::cout << act.first << " " << act.second << "*\n";
 	}
+	std::cout << "\n";
 /**/
 	int filas_llenas = 0;
 	int numero_elementos = 0, elementos_distintos = 0;
@@ -180,16 +181,16 @@ int main( ) {
 	std::sort(acumulado.begin( ), acumulado.end( ), std::greater<std::pair<int, int>>( ));
 
 	for (int i = 0; i < tam; ++i) {
-		std::cout << elementos_vistos[i] << " ";
+		//std::cout << elementos_vistos[i] << " ";
 	}
-	std::cout << "\nPos: " << pos_elemento_unico << "\n";
+	//std::cout << "\nPos: " << pos_elemento_unico << "\n";
 
 	permutar_filas_columnas(cuadrado, acumulado, tam, pos_elemento_unico);
 
-	imprime(cuadrado);
-	lemma_2(cuadrado, acumulado, tam);
-	imprime(cuadrado);
-	lemma_1(cuadrado, acumulado, tam);
-	imprime(cuadrado);
+	//imprime(cuadrado);
+	//lemma_2(cuadrado, acumulado, tam);
+	//imprime(cuadrado);
+	//lemma_1(cuadrado, acumulado, tam);
+	//imprime(cuadrado);
 /**/
 }
