@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include <numeric>
 
 template<typename T>
 struct vector2d : public std::vector<std::vector<T>> {
@@ -38,11 +39,11 @@ int maxBPM(vector2d<bool>& grafo, std::vector<int>& acoplamiento_, int n) {
 }
 
 template<typename T>
-void imprime(T cuadrado, int tam) {
-   std::cout << "Temp:\n";
-	for (int i = 0; i < tam; ++i) {
-		for (int j = 0; j < tam; ++j) {
-			std::cout << cuadrado[i][j] << " ";
+void imprime(const vector2d<T>& cuadrado) {
+   std::cout << "Actual:\n";
+	for (const auto& fila : cuadrado) {
+		for (const auto& celda : fila) {
+			std::cout << celda << " ";
 		}
 		std::cout << "\n";
 	}
@@ -112,14 +113,28 @@ void lemma_2(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulad
 }
 
 void permutar_filas_columnas(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int pos_elemento_unico) {
-   int anterior = 1 + (std::lower_bound(acumulado.begin( ), acumulado.end( ), std::make_pair(0, pos_elemento_unico))->first);
+	for (auto act : acumulado) {
+		std::cout << act.first << " " << act.second << "+\n";
+	}
+
+	std::sort(acumulado.begin( ), acumulado.end( ));
+	auto it = (std::lower_bound(acumulado.begin( ), acumulado.end( ), std::make_pair(0, pos_elemento_unico), [](const auto& a, const auto& b) {
+		return (a.second > b.second);
+	}));
+   
+	int anterior = 1 + it->first;
+	std::cerr << it->second << " que obtengo\n";
 	std::vector<int> columnas_finales = { anterior - 1 };
    for (int i = 0; i < tam; ++i) {
-		if (acumulado[i].second != pos_elemento_unico && acumulado[i].first != 0) {
+		if (acumulado[i].second != it->second && acumulado[i].first != 0) {
 			columnas_finales.push_back(anterior + acumulado[i].first);
          anterior += acumulado[i].first;
 		}
 	}
+	for (auto act : columnas_finales) {
+		std::cout << act << " ";
+	}
+	std::cout << "\n";
 }
 
 void teorema(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam) {
@@ -132,10 +147,14 @@ int main( ) {
 
 	vector2d<int> cuadrado(tam);
 	std::vector<std::pair<int, int>> acumulado(tam);
-	for (int i = 0; i < tam; ++i) {
-		acumulado[i].second = i;
-	}
+	std::partial_sum(acumulado.begin( ), acumulado.end( ), acumulado.begin( ), [](const auto& a, const auto& b) {
+		return std::make_pair(a.first, a.second + 1);
+	});
 
+	for (auto act : acumulado) {
+		std::cout << act.first << " " << act.second << "*\n";
+	}
+/**/
 	int filas_llenas = 0;
 	int numero_elementos = 0, elementos_distintos = 0;
 	std::vector<bool> filas_vistas(tam, false);
@@ -167,9 +186,10 @@ int main( ) {
 
 	permutar_filas_columnas(cuadrado, acumulado, tam, pos_elemento_unico);
 
-	//imprime(cuadrado, tam);
-	//lemma_2(cuadrado, acumulado, tam);
-	//imprime(cuadrado, tam);
-	//lemma_1(cuadrado, acumulado, tam);
-	//imprime(cuadrado, tam);
+	imprime(cuadrado);
+	lemma_2(cuadrado, acumulado, tam);
+	imprime(cuadrado);
+	lemma_1(cuadrado, acumulado, tam);
+	imprime(cuadrado);
+/**/
 }
