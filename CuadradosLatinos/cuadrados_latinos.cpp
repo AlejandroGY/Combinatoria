@@ -62,7 +62,6 @@ void lemma_1(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulad
 				}
 			}
          
-			//imprime(adyacencia, tam);
 			std::vector<int> acoplamiento(tam, -1);
 			int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
          for (int i = 0; i < tam; ++i) {
@@ -99,13 +98,11 @@ void lemma_2(vector2d<int>& cuadrado, std::vector<std::pair<int, int>>& acumulad
          std::vector<int> acoplamiento(tam, -1);
 			int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
          
-         //imprime(adyacencia, tam);
          for (int i = 0; i < tam; ++i) {
             if (acoplamiento[i] != -1) {
 					cuadrado[actual.second][i] = acoplamiento[i] + 1;
 				}
 			}
-         //imprime(cuadrado, tam);
          acumulado[index].first = tam;
 		}
       index += 1;
@@ -151,11 +148,6 @@ int main( ) {
 		return std::make_pair(a.first, a.second + 1);
 	});
 
-	for (auto act : acumulado) {
-		std::cout << act.first << " " << act.second << "*\n";
-	}
-	std::cout << "\n";
-/**/
 	int filas_llenas = 0;
 	int numero_elementos = 0, elementos_distintos = 0;
 	std::vector<bool> filas_vistas(tam, false);
@@ -181,9 +173,9 @@ int main( ) {
 	std::sort(acumulado.begin( ), acumulado.end( ), std::greater<std::pair<int, int>>( ));
 
 	for (int i = 0; i < tam; ++i) {
-		//std::cout << elementos_vistos[i] << " ";
+		std::cout << elementos_vistos[i] << " ";
 	}
-	//std::cout << "\nPos: " << pos_elemento_unico << "\n";
+	std::cout << "\nPos: " << pos_elemento_unico << "\n";
 
 	permutar_filas_columnas(cuadrado, acumulado, tam, pos_elemento_unico);
 
