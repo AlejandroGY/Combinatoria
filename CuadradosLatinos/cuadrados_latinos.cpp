@@ -46,8 +46,8 @@ int maxBPM(base::matrix<bool, 2>& grafo, std::vector<int>& acoplamiento_, int n)
 }
 
 template<typename T>
-void imprime(const base::matrix<T, 2>& cuadrado) {
-   std::cout << "Actual:\n";
+void imprime(const base::matrix<T, 2>& cuadrado, std::string s = "") {
+   std::cout << s << "\n";
 	for (const auto& fila : cuadrado) {
 		for (const auto& celda : fila) {
 			std::cout << celda << " ";
@@ -65,6 +65,15 @@ std::pair<int, int> busca_elemento(base::matrix<int, 2>& cuadrado, int elemento,
 		}
 	}
 	return { -1, -1 };
+}
+
+template<typename T>
+void copia_cuadrado(base::matrix<T, 2>& fuente, base::matrix<T, 2>& destino, int tam) {
+	for (int i = 0; i < tam; ++i) {
+		for (int j = 0; j < tam; ++j) {
+			destino[i][j] = fuente[i][j];
+		}
+	}
 }
 
 void lemma_1(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam) {
@@ -126,7 +135,7 @@ void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& a
 	}
 }
 
-void permuta_filas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam) {
+void intercambia_filas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam) {
 	std::reverse(filas.begin( ), filas.end( ));
 	for (auto f : filas) {
 		for (int i = 0; i < tam; ++i) {
@@ -135,20 +144,31 @@ void permuta_filas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, in
 	}
 }
 
-void permuta_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam, std::vector<int>& elementos_vistos) {
-	int elemento_unico = 1 + (std::find(elementos_vistos.begin( ), elementos_vistos.end( ), 1) - elementos_vistos.begin( ));
-	std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam);
-	std::cout << "Pos_elem:" << pos_elemento_unico.first << " - " << pos_elemento_unico.second << "\n";
-
-	int siguiente = 0;
-	std::vector<bool> fila_ocupada(tam, false);
-	for (int i = 0; i < tam; ++i) {
-
+void intercambia_columnas(base::matrix<int, 2>& cuadrado, int i, int j, int tam) {
+	for (int k = 0; k < tam; ++k) {
+		std::swap(cuadrado[k][i], cuadrado[k][j]);
 	}
 }
 
-void permutar_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, std::vector<int>& elementos_vistos) {   
-	int elemento_unico = 1 + (std::find(elementos_vistos.begin( ), elementos_vistos.end( ), 1) - elementos_vistos.begin( ));
+void intercambia_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam, std::vector<int>& cantidad_elementos) {
+	int elemento_unico = 1 + (std::find(cantidad_elementos.begin( ), cantidad_elementos.end( ), 1) - cantidad_elementos.begin( ));
+	std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam);
+
+	int siguiente = 0;
+	for (int f = 0; f < filas.size( ); ++f) {
+		for (int i = siguiente; i < tam; ++i) {
+			if (cuadrado[filas[f].second][i] == elemento_unico) {
+				intercambia_columnas(cuadrado, i, filas[0].second, tam);
+			} else if (cuadrado[filas[f].second][i] != 0) {
+				siguiente += (siguiente == filas[0].second);
+				intercambia_columnas(cuadrado, i, siguiente++, tam);
+			}
+		}
+	}
+}
+
+void permuta_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, std::vector<int>& cantidad_elementos) {   
+	int elemento_unico = 1 + (std::find(cantidad_elementos.begin( ), cantidad_elementos.end( ), 1) - cantidad_elementos.begin( ));
 	std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam);
 	
 	int anterior = acumulado[pos_elemento_unico.first].first;
@@ -159,16 +179,12 @@ void permutar_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pa
          anterior += acumulado[i].first;
 		}
 	}
-	for (int i = 0; i < filas.size( ); ++i) {
-		std::cout << filas[i].first << " va a " << filas[i].second << "\n";
-	}
-	
-	permuta_filas(cuadrado, filas, tam);
-	permuta_columnas(cuadrado, filas, tam, elementos_vistos);
+	intercambia_filas(cuadrado, filas, tam);
+	intercambia_columnas(cuadrado, filas, tam, cantidad_elementos);
 }
 
-void teorema(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, std::vector<int>& elementos_vistos) {
-	permutar_filas_columnas(cuadrado, acumulado, tam, elementos_vistos);
+void teorema(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, std::vector<int>& cantidad_elementos) {
+	permuta_filas_columnas(cuadrado, acumulado, tam, cantidad_elementos);
 }
 
 int main( ) {
@@ -181,30 +197,24 @@ int main( ) {
 		return std::make_pair(a.first, a.second + 1);
 	});
 
-	int filas_llenas = 0;
-	int numero_elementos = 0, elementos_distintos = 0;
-	std::vector<bool> columnas_vistas(tam, false);
-	std::vector<int> elementos_vistos(tam, 0);
+	int elementos_distintos = 0;
+	std::vector<int> cantidad_elementos(tam, 0);
 	for (int i = 0; i < n; ++i) {
 		int r, c, e;
 		std::cin >> r >> c >> e;
 
 		cuadrado[r - 1][c - 1] = e;
 		acumulado[r - 1].first += 1;
-		elementos_vistos[e - 1] += 1;
+		cantidad_elementos[e - 1] += 1;
 
-		if (elementos_vistos[e - 1] <= 1) {
-			numero_elementos += 1;
-		}
-		if (columnas_vistas[r - 1] == false) {
-			filas_llenas += 1;
-			columnas_vistas[r - 1] = true;
+		if (cantidad_elementos[e - 1] <= 1) {
+			elementos_distintos += 1;
 		}
 	}
 
-	imprime(cuadrado);
-	teorema(cuadrado, acumulado, tam, elementos_vistos);
-	imprime(cuadrado);
+	imprime(cuadrado, "Inicial");
+	teorema(cuadrado, acumulado, tam, cantidad_elementos);
+	imprime(cuadrado, "Final");
 
 	//imprime(cuadrado);
 	//lemma_2(cuadrado, acumulado, tam);
