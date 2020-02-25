@@ -173,7 +173,7 @@ void permuta_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pai
 	
 	int anterior = acumulado[pos_elemento_unico.first].first;
 	std::vector<std::pair<int, int>> filas = {{ pos_elemento_unico.first, anterior - 1 }};
-   for (int i = 0; i < tam; ++i) {
+	for (int i = 0; i < tam; ++i) {
 		if (acumulado[i].first != 0 && acumulado[i].second != pos_elemento_unico.first) {
 			filas.push_back({ i, anterior + acumulado[i].first - 1 });
          anterior += acumulado[i].first;
