@@ -103,36 +103,36 @@ void lemma_1(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& a
 void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam) {
    int index = 0;
    for (auto& actual : acumulado) {
-		base::matrix<bool, 2> adyacencia(tam, tam, 1);
+      base::matrix<bool, 2> adyacencia(tam, tam, 1);
       if (actual.first != 0) {
          for (int j = 0; j < tam; ++j) {
             if (cuadrado[actual.second][j] != 0) {
                for (int i = 0; i < tam; ++i) {
-						adyacencia[i][j] = 0;
-					}
+                  adyacencia[i][j] = 0;
+               }
                for (int i = 0; i < tam; ++i) {
-						adyacencia[cuadrado[actual.second][j] - 1][i] = 0;
-					}
-				} else {
+                  adyacencia[cuadrado[actual.second][j] - 1][i] = 0;
+               }
+            } else {
                for (int i = 0; i < tam; ++i) {
                   if (cuadrado[i][j] != 0) {
-							adyacencia[cuadrado[i][j] - 1][j] = 0;
-						}
-					}
-				}
-			}
+                     adyacencia[cuadrado[i][j] - 1][j] = 0;
+                  }
+               }
+            }
+         }
 
          std::vector<int> acoplamiento(tam, -1);
-			int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
+         int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
          for (int i = 0; i < tam; ++i) {
             if (acoplamiento[i] != -1) {
-					cuadrado[actual.second][i] = acoplamiento[i] + 1;
-				}
-			}
+               cuadrado[actual.second][i] = acoplamiento[i] + 1;
+            }
+         }
          acumulado[index].first = tam;
-		}
+      }
       index += 1;
-	}
+   }
 }
 
 void intercambia_filas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam) {
