@@ -78,26 +78,26 @@ void copia_cuadrado(base::matrix<T, 2>& fuente, base::matrix<T, 2>& destino, int
 
 void lemma_1(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam) {
    int index = 0;
-	for (auto& actual : acumulado) {
+   for (auto& actual : acumulado) {
       if (actual.first == 0) {
-			base::matrix<bool, 2> adyacencia(tam, tam, 1);
+         base::matrix<bool, 2> adyacencia(tam, tam, 1);
          for (int j = 0; j < tam; ++j) {
             for (int i = 0; i < tam; ++i) {
                if (cuadrado[i][j] != 0) {
-						adyacencia[cuadrado[i][j] - 1][j] = 0;
-					}
-				}
-			}
-         
-			std::vector<int> acoplamiento(tam, -1);
-			int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
+                  adyacencia[cuadrado[i][j] - 1][j] = 0;
+               }
+            }
+         }
+
+         std::vector<int> acoplamiento(tam, -1);
+         int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
          for (int i = 0; i < tam; ++i) {
-				cuadrado[actual.second][i] = acoplamiento[i] + 1;
-			}
-			acumulado[index].first = tam;
-		}
-		index += 1;
-	}
+            cuadrado[actual.second][i] = acoplamiento[i] + 1;
+         }
+         acumulado[index].first = tam;
+      }
+      index += 1;
+   }
 }
 
 void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam) {
