@@ -238,3 +238,4 @@ int main( ) {
    resuelve(cuadrado, tam, acumulado, cantidad_elementos, caso_act);
    imprime(cuadrado, "Cuadro Final:");
 }
+
