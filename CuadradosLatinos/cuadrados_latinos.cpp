@@ -76,19 +76,41 @@ void copia_cuadrado(base::matrix<T, 2>& fuente, base::matrix<T, 2>& destino, int
    }
 }
 
-void lemma_1(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, std::vector<int>& omitir) {
+void ajusta_adyacencia(base::matrix<int, 2>& cuadrado, base::matrix<bool, 2>& adyacencia, int tam, int tope, std::vector<int>& omitir) {
+   for (const auto& actual : omitir) {
+      for (int j = 0; j < tam; ++j) {
+         adyacencia[actual - 1][j] = 0;
+      }
+   }
+
+   for (int i = 0; i < tope; ++i) {
+      for (int j = 0; j < tam; ++j) {
+         if (cuadrado[i][j] != 0) {
+            adyacencia[cuadrado[i][j] - 1][j] = 0;
+         }
+      }
+   }
+   for (int i = 0; i < tam; ++i) {
+      for (int j = tam - tope; j < tam; ++j) {
+         adyacencia[i][j] = 0;
+      }
+   }
+}
+
+void lemma_1(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int tope, std::vector<int>& omitir) {
    int index = 0;
    for (auto& actual : acumulado) {
-      if (actual.first == 0) {
+      if (actual.first == 0 && actual.second >= tope) {
          base::matrix<bool, 2> adyacencia(tam, tam, 1);
-         for (int j = 0; j < tam; ++j) {
-            for (int i = 0; i < tam; ++i) {
+         for (int j = 0; j < tam - tope; ++j) {
+            for (int i = tope; i < tam; ++i) {
                if (cuadrado[i][j] != 0) {
                   adyacencia[cuadrado[i][j] - 1][j] = 0;
                }
             }
          }
 
+         ajusta_adyacencia(cuadrado, adyacencia, tam, tope, omitir);
          imprime(adyacencia, "Matriz adyacencia1:");
 
          std::vector<int> acoplamiento(tam, -1);
@@ -96,18 +118,18 @@ void lemma_1(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& a
          for (int i = 0; i < tam; ++i) {
             cuadrado[actual.second][i] = acoplamiento[i] + 1;
          }
-         acumulado[index].first = tam;
+         acumulado[index].first = tam - tope;
       }
       index += 1;
    }
 }
 
-void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, std::vector<int>& omitir) {
+void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int tope, std::vector<int>& omitir) {
    int index = 0;
    for (auto& actual : acumulado) {
       base::matrix<bool, 2> adyacencia(tam, tam, 1);
-      if (actual.first != 0) {
-         for (int j = 0; j < tam; ++j) {
+      if (actual.first != 0 && actual.second >= tope) {
+         for (int j = 0; j < tam - tope; ++j) {
             if (cuadrado[actual.second][j] != 0) {
                for (int i = 0; i < tam; ++i) {
                   adyacencia[i][j] = 0;
@@ -116,7 +138,7 @@ void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& a
                   adyacencia[cuadrado[actual.second][j] - 1][i] = 0;
                }
             } else {
-               for (int i = 0; i < tam; ++i) {
+               for (int i = tope; i < tam; ++i) {
                   if (cuadrado[i][j] != 0) {
                      adyacencia[cuadrado[i][j] - 1][j] = 0;
                   }
@@ -124,7 +146,8 @@ void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& a
             }
          }
 
-         //imprime(adyacencia, "Matriz adyacencia2:");
+         ajusta_adyacencia(cuadrado, adyacencia, tam, tope, omitir);
+         imprime(adyacencia, "Matriz adyacencia2:");
 
          std::vector<int> acoplamiento(tam, -1);
          int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
@@ -133,10 +156,14 @@ void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& a
                cuadrado[actual.second][i] = acoplamiento[i] + 1;
             }
          }
-         acumulado[index].first = tam;
+         acumulado[index].first = tam - tope;
       }
       index += 1;
    }
+}
+
+void intercambia_diagonal(base::matrix<int, 2>& cuadrado, int elemento_unico, std::pair<int, int>& pos_elem_unico) {
+
 }
 
 void intercambia_filas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam) {
@@ -187,8 +214,21 @@ void permuta_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pai
    intercambia_columnas(cuadrado, filas, tam, cantidad_elementos);
 }
 
-void teorema(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, std::vector<int>& cantidad_elementos) {
+void teorema(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int tope, std::vector<int>& cantidad_elementos, std::vector<int>& omitir) {
    permuta_filas_columnas(cuadrado, acumulado, tam, cantidad_elementos);
+   imprime(cuadrado, "Cuadrado Permutado:");
+
+   int elemento_unico = 1 + (std::find(cantidad_elementos.begin( ), cantidad_elementos.end( ), 1) - cantidad_elementos.begin( ));
+   std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam);
+
+   cuadrado[pos_elemento_unico.first][pos_elemento_unico.second] = 0;
+   acumulado[pos_elemento_unico.first].first -= 1;
+   cantidad_elementos[elemento_unico - 1] -= 1;
+   std::cerr << acumulado[pos_elemento_unico.first].first << "->" << acumulado[pos_elemento_unico.first].second << " -> " << cantidad_elementos[elemento_unico] << "\n";
+   omitir.push_back(elemento_unico);
+   lemma_2(cuadrado, acumulado, tam, 1, omitir);
+   lemma_1(cuadrado, acumulado, tam, 1, omitir);
+   
 }
 
 int caso(base::matrix<int, 2>& cuadrado, int tam, std::vector<std::pair<int, int>>& acumulado, std::vector<int>& cantidad_elementos) {
@@ -215,11 +255,15 @@ int caso(base::matrix<int, 2>& cuadrado, int tam, std::vector<std::pair<int, int
 void resuelve(base::matrix<int, 2>& cuadrado, int tam, std::vector<std::pair<int, int>>& acumulado, std::vector<int>& cantidad_elementos, int caso, std::vector<int>& elementos_omitidos) {
    switch (caso) {
    case 0:
-      lemma_2(cuadrado, acumulado, tam, elementos_omitidos);
-      lemma_1(cuadrado, acumulado, tam, elementos_omitidos);
+      std::cerr << "Entre a lemma 2\n";
+      lemma_2(cuadrado, acumulado, tam, 0, elementos_omitidos);
+
+      std::cerr << "Entre a lemma 1\n";
+      lemma_1(cuadrado, acumulado, tam, 0, elementos_omitidos);
+      std::cerr << "Sali a lemma 1\n";
       break;
    default:
-      teorema(cuadrado, acumulado, tam, cantidad_elementos);
+      teorema(cuadrado, acumulado, tam, 0, cantidad_elementos, elementos_omitidos);
       break;
    }
 }
@@ -227,9 +271,9 @@ void resuelve(base::matrix<int, 2>& cuadrado, int tam, std::vector<std::pair<int
 int main( ) {
    int tam, n;
    std::cin >> tam >> n;
-
    base::matrix<int, 2> cuadrado(tam, tam);
-   std::vector<int> elementos_omitidos(tam);
+
+   std::vector<int> elementos_omitidos;
    std::vector<int> cantidad_elementos(tam);
    std::vector<std::pair<int, int>> acumulado(tam);
    for (int i = 0; i < n; ++i) {
@@ -240,11 +284,16 @@ int main( ) {
 
    imprime(cuadrado, "Cuadro Inicial:");
    int caso_act = caso(cuadrado, tam, acumulado, cantidad_elementos);
-   //resuelve(cuadrado, tam, acumulado, cantidad_elementos, caso_act, elementos_omitidos);
+   resuelve(cuadrado, tam, acumulado, cantidad_elementos, caso_act, elementos_omitidos);
+   imprime(cuadrado, "Cuadrado Resuelto:");
+   
    //teorema(cuadrado, acumulado, tam, cantidad_elementos);
    //imprime(cuadrado, "Cuadro Permutado:");
    
-   lemma_1(cuadrado, acumulado, tam, elementos_omitidos);
-   imprime(cuadrado, "Cuadro Final:");
+   //lemma_2(cuadrado, acumulado, tam, 2, elementos_omitidos);
+   //imprime(cuadrado, "Despues del lemma 2:");
+
+   //lemma_1(cuadrado, acumulado, tam, 2, elementos_omitidos);
+   //imprime(cuadrado, "Despues del lemma 1:");
 }
 
