@@ -89,7 +89,7 @@ void lemma_1(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& a
             }
          }
 
-         //imprime(adyacencia, "Matriz adyacencia1:");
+         imprime(adyacencia, "Matriz adyacencia1:");
 
          std::vector<int> acoplamiento(tam, -1);
          int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
@@ -124,7 +124,7 @@ void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& a
             }
          }
 
-         imprime(adyacencia, "Matriz adyacencia2:");
+         //imprime(adyacencia, "Matriz adyacencia2:");
 
          std::vector<int> acoplamiento(tam, -1);
          int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
@@ -208,7 +208,7 @@ int caso(base::matrix<int, 2>& cuadrado, int tam, std::vector<std::pair<int, int
             elementos_distintos += (cantidad_elementos[cuadrado[i][j] - 1] == 1);
          }
       }
-   }	
+   }  
    return ((elementos >= tam || (elementos_distintos <= (tam / 2))) ? 0 : 1);
 }
 
@@ -241,9 +241,10 @@ int main( ) {
    imprime(cuadrado, "Cuadro Inicial:");
    int caso_act = caso(cuadrado, tam, acumulado, cantidad_elementos);
    //resuelve(cuadrado, tam, acumulado, cantidad_elementos, caso_act, elementos_omitidos);
-   teorema(cuadrado, acumulado, tam, cantidad_elementos);
-   imprime(cuadrado, "Cuadro Permutado:");
-   lemma_2(cuadrado, acumulado, tam, elementos_omitidos);
+   //teorema(cuadrado, acumulado, tam, cantidad_elementos);
+   //imprime(cuadrado, "Cuadro Permutado:");
+   
+   lemma_1(cuadrado, acumulado, tam, elementos_omitidos);
    imprime(cuadrado, "Cuadro Final:");
 }
 
