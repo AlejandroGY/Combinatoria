@@ -276,26 +276,6 @@ void permuta_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pai
    arregla_acumulado(cuadrado, acumulado, cantidad_elementos, tam);
 }
 
-void teorema(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int tope, std::vector<int>& cantidad_elementos, std::vector<int>& omitir) {
-   permuta_filas_columnas(cuadrado, acumulado, tam, cantidad_elementos);
-   imprime(cuadrado, "Cuadrado Permutado:");
-
-   int elemento_unico = 1 + (std::find(cantidad_elementos.begin( ), cantidad_elementos.end( ), 1) - cantidad_elementos.begin( ));
-   std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam);
-
-   cuadrado[pos_elemento_unico.first][pos_elemento_unico.second] = 0;
-   acumulado[pos_elemento_unico.first].first -= 1;
-   cantidad_elementos[elemento_unico - 1] -= 1;
-   omitir.push_back(elemento_unico);
-
-   lemma_2(cuadrado, acumulado, tam, 1, omitir);
-   lemma_1(cuadrado, acumulado, tam, 1, omitir);
-   intercambia_diagonal(cuadrado, acumulado, elemento_unico, pos_elemento_unico, tam, 1);
-   arregla_acumulado(cuadrado, acumulado, cantidad_elementos, tam);
-   omitir.pop_back( );
-   lemma_1(cuadrado, acumulado, tam, 0, omitir);
-}
-
 int caso(base::matrix<int, 2>& cuadrado, int tam, std::vector<std::pair<int, int>>& acumulado, std::vector<int>& cantidad_elementos) {
    std::fill(cantidad_elementos.begin( ), cantidad_elementos.end( ), 0);
    std::partial_sum(acumulado.begin( ), acumulado.end( ), acumulado.begin( ), [](const auto& a, const auto& b) {
@@ -315,6 +295,34 @@ int caso(base::matrix<int, 2>& cuadrado, int tam, std::vector<std::pair<int, int
       }
    }
    return ((elementos >= tam || (elementos_distintos <= (tam / 2))) ? 0 : 1);
+}
+
+void trivial(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int tope) {
+   for (int i = tam - tope; i < tam; ++i) {
+      for (int j = 0; j < tam - tope; ++j) {
+
+      }
+   }
+}
+
+void teorema(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int tope, std::vector<int>& cantidad_elementos, std::vector<int>& omitir) {
+   permuta_filas_columnas(cuadrado, acumulado, tam, cantidad_elementos);
+   imprime(cuadrado, "Cuadrado Permutado:");
+
+   int elemento_unico = 1 + (std::find(cantidad_elementos.begin( ), cantidad_elementos.end( ), 1) - cantidad_elementos.begin( ));
+   std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam);
+
+   cuadrado[pos_elemento_unico.first][pos_elemento_unico.second] = 0;
+   acumulado[pos_elemento_unico.first].first -= 1;
+   cantidad_elementos[elemento_unico - 1] -= 1;
+   omitir.push_back(elemento_unico);
+
+   lemma_2(cuadrado, acumulado, tam, 1, omitir);
+   lemma_1(cuadrado, acumulado, tam, 1, omitir);
+   intercambia_diagonal(cuadrado, acumulado, elemento_unico, pos_elemento_unico, tam, 1);
+   arregla_acumulado(cuadrado, acumulado, cantidad_elementos, tam);
+   omitir.pop_back( );
+   lemma_1(cuadrado, acumulado, tam, 0, omitir);
 }
 
 void resuelve(base::matrix<int, 2>& cuadrado, int tam, std::vector<std::pair<int, int>>& acumulado, std::vector<int>& cantidad_elementos, int caso, std::vector<int>& elementos_omitidos) {
