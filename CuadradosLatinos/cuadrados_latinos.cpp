@@ -219,7 +219,7 @@ void intercambia_diagonal(base::matrix<int, 2>& cuadrado, std::vector<std::pair<
 
 void intercambia_filas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam) {
    std::reverse(filas.begin( ), filas.end( ));
-   for (auto f : filas) {
+   for (const auto& f : filas) {
       for (int i = 0; i < tam; ++i) {
          std::swap(cuadrado[f.first][i], cuadrado[f.second][i]);
       }
@@ -249,16 +249,26 @@ void intercambia_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<
    }
 }
 
-void permuta_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, std::vector<int>& cantidad_elementos) {   
+void permuta_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, std::vector<int>& cantidad_elementos) {
+   std::cerr << "\nCantidad de elementos:\n";
+   for (int i = 0; i < tam; ++i) {
+      std::cerr << cantidad_elementos[i] << " ";
+   }
+   std::cerr << "\n";
+
    int elemento_unico = 1 + (std::find(cantidad_elementos.begin( ), cantidad_elementos.end( ), 1) - cantidad_elementos.begin( ));
    std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam);
    
    int anterior = acumulado[pos_elemento_unico.first].first;
+   std::cerr << "Ant: " << anterior << "\n";
    std::vector<std::pair<int, int>> filas = {{ pos_elemento_unico.first, anterior - 1 }};
+   
+   anterior += 1;
    for (int i = 0; i < tam; ++i) {
       if (acumulado[i].first != 0 && acumulado[i].second != pos_elemento_unico.first) {
-         filas.push_back({ i, anterior + acumulado[i].first - 1 });
          anterior += acumulado[i].first;
+         filas.push_back({ i, anterior - 1 });
+         std::cerr << "Ant: " << anterior << "\n";
       }
    }
    intercambia_filas(cuadrado, filas, tam);
