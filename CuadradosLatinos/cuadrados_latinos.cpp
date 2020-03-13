@@ -56,17 +56,6 @@ void imprime(const base::matrix<T, 2>& cuadrado, std::string s = "") {
    }
 }
 
-std::pair<int, int> busca_elemento(base::matrix<int, 2>& cuadrado, int elemento, int tam) {
-   for (int i = 0; i < tam; ++i) {
-      for (int j = 0; j < tam; ++j) {
-         if (cuadrado[i][j] == elemento) {
-            return { i, j };
-         }
-      }
-   }
-   return { -1, -1 };
-}
-
 template<typename T>
 void copia_cuadrado(base::matrix<T, 2>& fuente, base::matrix<T, 2>& destino, int tam) {
    for (int i = 0; i < tam; ++i) {
@@ -76,13 +65,24 @@ void copia_cuadrado(base::matrix<T, 2>& fuente, base::matrix<T, 2>& destino, int
    }
 }
 
-void ajusta_adyacencia(base::matrix<int, 2>& cuadrado, base::matrix<bool, 2>& adyacencia, int tam, int tope, std::vector<int>& omitir) {
+std::pair<int, int> busca_elemento(base::matrix<int, 2>& cuadrado, int elemento, int tam, int reduccion) {
+   for (int i = reduccion; i < tam; ++i) {
+      for (int j = 0; j < tam - reduccion; ++j) {
+         if (cuadrado[i][j] == elemento) {
+            return { i, j };
+         }
+      }
+   }
+   return { -1, -1 };
+}
+
+void ajusta_adyacencia(base::matrix<int, 2>& cuadrado, base::matrix<bool, 2>& adyacencia, int tam, int reduccion, std::vector<int>& omitir) {
    for (const auto& actual : omitir) {
       for (int j = 0; j < tam; ++j) {
          adyacencia[actual - 1][j] = 0;
       }
    }
-   for (int i = 0; i < tope; ++i) {
+   for (int i = 0; i < reduccion; ++i) {
       for (int j = 0; j < tam; ++j) {
          if (cuadrado[i][j] != 0) {
             adyacencia[cuadrado[i][j] - 1][j] = 0;
@@ -90,82 +90,13 @@ void ajusta_adyacencia(base::matrix<int, 2>& cuadrado, base::matrix<bool, 2>& ad
       }
    }
    for (int i = 0; i < tam; ++i) {
-      for (int j = tam - tope; j < tam; ++j) {
+      for (int j = tam - reduccion; j < tam; ++j) {
          adyacencia[i][j] = 0;
       }
    }
 }
 
-void lemma_1(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int tope, std::vector<int>& omitir) {
-   int index = 0;
-   for (auto& actual : acumulado) {
-      if (actual.first == 0 && actual.second >= tope) {
-         base::matrix<bool, 2> adyacencia(tam, tam, 1);
-         for (int j = 0; j < tam - tope; ++j) {
-            for (int i = tope; i < tam; ++i) {
-               if (cuadrado[i][j] != 0) {
-                  adyacencia[cuadrado[i][j] - 1][j] = 0;
-               }
-            }
-         }
-
-         if (tope != 0) {
-            ajusta_adyacencia(cuadrado, adyacencia, tam, tope, omitir);
-         }
-         imprime(adyacencia, "Matriz adyacencia1:");
-
-         std::vector<int> acoplamiento(tam, -1);
-         int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
-         for (int i = 0; i < tam; ++i) {
-            cuadrado[actual.second][i] = acoplamiento[i] + 1;
-         }
-         acumulado[index].first = tam - tope;
-      }
-      index += 1;
-   }
-}
-
-void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int tope, std::vector<int>& omitir) {
-   int index = 0;
-   for (auto& actual : acumulado) {
-      base::matrix<bool, 2> adyacencia(tam, tam, 1);
-      if (actual.first != 0 && actual.second >= tope) {
-         for (int j = 0; j < tam - tope; ++j) {
-            if (cuadrado[actual.second][j] != 0) {
-               for (int i = 0; i < tam; ++i) {
-                  adyacencia[i][j] = 0;
-               }
-               for (int i = 0; i < tam; ++i) {
-                  adyacencia[cuadrado[actual.second][j] - 1][i] = 0;
-               }
-            } else {
-               for (int i = tope; i < tam; ++i) {
-                  if (cuadrado[i][j] != 0) {
-                     adyacencia[cuadrado[i][j] - 1][j] = 0;
-                  }
-               }
-            }
-         }
-
-         if (tope != 0) {
-            ajusta_adyacencia(cuadrado, adyacencia, tam, tope, omitir);
-         }
-         imprime(adyacencia, "Matriz adyacencia2:");
-
-         std::vector<int> acoplamiento(tam, -1);
-         int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
-         for (int i = 0; i < tam; ++i) {
-            if (acoplamiento[i] != -1) {
-               cuadrado[actual.second][i] = acoplamiento[i] + 1;
-            }
-         }
-         acumulado[index].first = tam - tope;
-      }
-      index += 1;
-   }
-}
-
-void arregla_acumulado(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, std::vector<int>& cantidad_elementos, int tam, int tope) {
+void arregla_acumulado(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, std::vector<int>& cantidad_elementos, int tam, int reduccion) {
    std::fill(cantidad_elementos.begin( ), cantidad_elementos.end( ), 0);
    std::partial_sum(acumulado.begin( ), acumulado.end( ), acumulado.begin( ), [](const auto& a, const auto& b) {
       return std::make_pair(a.first, a.second + 1);
@@ -173,8 +104,8 @@ void arregla_acumulado(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int
 
    int elementos = 0;
    int elementos_distintos = 0;
-   for (int i = tope; i < tam; ++i) {
-      for (int j = 0; j < tam - tope; ++j) {
+   for (int i = reduccion; i < tam; ++i) {
+      for (int j = 0; j < tam - reduccion; ++j) {
          if (cuadrado[i][j] != 0) {
             elementos += 1;
             cantidad_elementos[cuadrado[i][j] - 1] += 1;
@@ -185,26 +116,95 @@ void arregla_acumulado(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int
    }
 }
 
-void intercambia_diagonal(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int elemento_unico, std::pair<int, int>& pos_elem_unico, int tam, int tope) {
+void lemma_1(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int reduccion, std::vector<int>& omitir) {
+   int index = 0;
+   for (auto& actual : acumulado) {
+      if (actual.first == 0 && actual.second >= reduccion) {
+         base::matrix<bool, 2> adyacencia(tam, tam, 1);
+         for (int j = 0; j < tam - reduccion; ++j) {
+            for (int i = reduccion; i < tam; ++i) {
+               if (cuadrado[i][j] != 0) {
+                  adyacencia[cuadrado[i][j] - 1][j] = 0;
+               }
+            }
+         }
+
+         if (reduccion != 0) {
+            ajusta_adyacencia(cuadrado, adyacencia, tam, reduccion, omitir);
+         }
+         imprime(adyacencia, "Matriz adyacencia1:");
+
+         std::vector<int> acoplamiento(tam, -1);
+         int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
+         for (int i = 0; i < tam; ++i) {
+            cuadrado[actual.second][i] = acoplamiento[i] + 1;
+         }
+         acumulado[index].first = tam - reduccion;
+      }
+      index += 1;
+   }
+}
+
+void lemma_2(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int reduccion, std::vector<int>& omitir) {
+   int index = 0;
+   for (auto& actual : acumulado) {
+      base::matrix<bool, 2> adyacencia(tam, tam, 1);
+      if (actual.first != 0 && actual.second >= reduccion) {
+         for (int j = 0; j < tam - reduccion; ++j) {
+            if (cuadrado[actual.second][j] != 0) {
+               for (int i = 0; i < tam; ++i) {
+                  adyacencia[i][j] = 0;
+               }
+               for (int i = 0; i < tam; ++i) {
+                  adyacencia[cuadrado[actual.second][j] - 1][i] = 0;
+               }
+            } else {
+               for (int i = reduccion; i < tam; ++i) {
+                  if (cuadrado[i][j] != 0) {
+                     adyacencia[cuadrado[i][j] - 1][j] = 0;
+                  }
+               }
+            }
+         }
+
+         if (reduccion != 0) {
+            ajusta_adyacencia(cuadrado, adyacencia, tam, reduccion, omitir);
+         }
+         imprime(adyacencia, "Matriz adyacencia2:");
+
+         std::vector<int> acoplamiento(tam, -1);
+         int tam_acoplamiento = maxBPM(adyacencia, acoplamiento, tam);
+         for (int i = 0; i < tam; ++i) {
+            if (acoplamiento[i] != -1) {
+               cuadrado[actual.second][i] = acoplamiento[i] + 1;
+            }
+         }
+         acumulado[index].first = tam - reduccion;
+      }
+      index += 1;
+   }
+}
+
+void intercambia_diagonal(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int elemento_unico, std::pair<int, int>& pos_elem_unico, int tam, int reduccion) {
    int ini = pos_elem_unico.first;
    std::vector<bool> visto(tam, false);
-   for (int i = ini; i <= tam - tope; ++i) {
+   for (int i = ini; i <= tam - reduccion; ++i) {
       acumulado[i].first += 1;
-      cuadrado[i][tam - tope] = elemento_unico;
-      std::swap(cuadrado[i][i], cuadrado[i][tam - tope]);
+      cuadrado[i][tam - reduccion] = elemento_unico;
+      std::swap(cuadrado[i][i], cuadrado[i][tam - reduccion]);
       std::cerr << i << "*\n";
-      if (!visto[cuadrado[i][tam - tope] - 1]) {
-         visto[cuadrado[i][tam - tope] - 1] = true;
+      if (!visto[cuadrado[i][tam - reduccion] - 1]) {
+         visto[cuadrado[i][tam - reduccion] - 1] = true;
       } else {
-         int actual = cuadrado[i][tam - tope];
+         int actual = cuadrado[i][tam - reduccion];
          std::vector<bool> fila_vista(tam, false); fila_vista[i] = true;
          while (true) {
             bool cambio = false;
-            for (int k = tope; k <= i; ++k) {
-               if (k != i && cuadrado[k][tam - tope] == actual && !fila_vista[k]) {
-                  std::swap(cuadrado[k][i], cuadrado[k][tam - tope]);
+            for (int k = reduccion; k <= i; ++k) {
+               if (k != i && cuadrado[k][tam - reduccion] == actual && !fila_vista[k]) {
+                  std::swap(cuadrado[k][i], cuadrado[k][tam - reduccion]);
                   fila_vista[k] = true;
-                  actual = cuadrado[k][tam - tope];
+                  actual = cuadrado[k][tam - reduccion];
                   cambio = true;
                }
             }
@@ -217,47 +217,48 @@ void intercambia_diagonal(base::matrix<int, 2>& cuadrado, std::vector<std::pair<
    }
 }
 
-void intercambia_filas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam) {
+void intercambia_filas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam, int reduccion) {
    std::reverse(filas.begin( ), filas.end( ));
    for (const auto& f : filas) {
-      for (int i = 0; i < tam; ++i) {
+      for (int i = 0; i < tam - reduccion; ++i) {
          std::swap(cuadrado[f.first][i], cuadrado[f.second][i]);
       }
    }
 }
 
-void intercambia_columnas(base::matrix<int, 2>& cuadrado, int i, int j, int tam) {
-   for (int k = 0; k < tam; ++k) {
+void intercambia_columnas(base::matrix<int, 2>& cuadrado, int i, int j, int tam, int reduccion) {
+   for (int k = reduccion; k < tam; ++k) {
       std::swap(cuadrado[k][i], cuadrado[k][j]);
    }
 }
 
-void intercambia_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam, std::vector<int>& cantidad_elementos) {
+void intercambia_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>> filas, int tam, int reduccion, std::vector<int>& cantidad_elementos) {
    int elemento_unico = 1 + (std::find(cantidad_elementos.begin( ), cantidad_elementos.end( ), 1) - cantidad_elementos.begin( ));
-   std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam);
+   std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam, reduccion);
 
    int siguiente = 0;
    for (int f = 0; f < filas.size( ); ++f) {
       for (int i = siguiente; i < tam; ++i) {
          if (cuadrado[filas[f].second][i] == elemento_unico) {
-            intercambia_columnas(cuadrado, i, filas[0].second, tam);
+            intercambia_columnas(cuadrado, i, filas[0].second, tam, reduccion);
          } else if (cuadrado[filas[f].second][i] != 0) {
             siguiente += (siguiente == filas[0].second);
-            intercambia_columnas(cuadrado, i, siguiente++, tam);
+            intercambia_columnas(cuadrado, i, siguiente++, tam, reduccion);
          }
       }
    }
 }
 
-void permuta_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, std::vector<int>& cantidad_elementos) {
+void permuta_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int reduccion, std::vector<int>& cantidad_elementos) {
+   //arregla_acumulado(cuadrado, acumulado, cantidad_elementos, tam, reduccion);
    std::cerr << "\nCantidad de elementos:\n";
    for (int i = 0; i < tam; ++i) {
-      std::cerr << cantidad_elementos[i] << " ";
+      std::cerr << "Elemento:" << i + 1 << " : " << cantidad_elementos[i] << "\n";
    }
    std::cerr << "\n";
 
    int elemento_unico = 1 + (std::find(cantidad_elementos.begin( ), cantidad_elementos.end( ), 1) - cantidad_elementos.begin( ));
-   std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam);
+   std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam, reduccion);
    std::cerr << "Elem_unico: " << elemento_unico << "\n";
    
    int anterior = acumulado[pos_elemento_unico.first].first;
@@ -272,9 +273,9 @@ void permuta_filas_columnas(base::matrix<int, 2>& cuadrado, std::vector<std::pai
          std::cerr << "Ant: " << anterior << "\n";
       }
    }
-   intercambia_filas(cuadrado, filas, tam);
-   intercambia_columnas(cuadrado, filas, tam, cantidad_elementos);
-   arregla_acumulado(cuadrado, acumulado, cantidad_elementos, tam);
+   intercambia_filas(cuadrado, filas, tam, reduccion);
+   intercambia_columnas(cuadrado, filas, tam, reduccion, cantidad_elementos);
+   arregla_acumulado(cuadrado, acumulado, cantidad_elementos, tam, reduccion);
 }
 
 int caso(base::matrix<int, 2>& cuadrado, int tam, int ini, std::vector<std::pair<int, int>>& acumulado, std::vector<int>& cantidad_elementos) {
@@ -299,25 +300,25 @@ int caso(base::matrix<int, 2>& cuadrado, int tam, int ini, std::vector<std::pair
    return ((elementos >= tam || (elementos_distintos <= (tam / 2))) ? 0 : 1);
 }
 
-void trivial(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int tope) {
-   for (int i = tam - tope; i < tam; ++i) {
-      for (int j = 0; j < tam - tope; ++j) {
+void trivial(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int reduccion) {
+   for (int i = tam - reduccion; i < tam; ++i) {
+      for (int j = 0; j < tam - reduccion; ++j) {
          
       }
    }
 }
 
-void teorema(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int tope, std::vector<int>& cantidad_elementos, std::vector<int>& omitir, std::vector<int>& elementos_unicos) {
-   if (tam - tope <= 2) {
-      trivial(cuadrado, acumulado, tam, tope);
+void teorema(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& acumulado, int tam, int reduccion, std::vector<int>& cantidad_elementos, std::vector<int>& omitir, std::vector<int>& elementos_unicos) {
+   if (tam - reduccion <= 2) {
+      trivial(cuadrado, acumulado, tam, reduccion);
       return;
    }
 
-   permuta_filas_columnas(cuadrado, acumulado, tam, cantidad_elementos);
+   permuta_filas_columnas(cuadrado, acumulado, tam, reduccion, cantidad_elementos);
    imprime(cuadrado, "Cuadrado Permutado:");
 
    int elemento_unico = 1 + (std::find(cantidad_elementos.begin( ), cantidad_elementos.end( ), 1) - cantidad_elementos.begin( ));
-   std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam);
+   std::pair<int, int> pos_elemento_unico = busca_elemento(cuadrado, elemento_unico, tam, reduccion);
 
    cuadrado[pos_elemento_unico.first][pos_elemento_unico.second] = 0;
    acumulado[pos_elemento_unico.first].first -= 1;
@@ -325,17 +326,17 @@ void teorema(base::matrix<int, 2>& cuadrado, std::vector<std::pair<int, int>>& a
    elementos_unicos.push_back(elemento_unico);
    omitir.push_back(elemento_unico);
 
-   int caso_act = caso(cuadrado, tam, tope + 1, acumulado, cantidad_elementos);
+   int caso_act = caso(cuadrado, tam, reduccion + 1, acumulado, cantidad_elementos);
    if (caso_act == 1) {
-      teorema(cuadrado, acumulado, tam, tope + 1, cantidad_elementos, omitir, elementos_unicos);
+      teorema(cuadrado, acumulado, tam, reduccion + 1, cantidad_elementos, omitir, elementos_unicos);
    }
 
-   lemma_2(cuadrado, acumulado, tam, tope + 1, omitir);
-   lemma_1(cuadrado, acumulado, tam, tope + 1, omitir);
-   intercambia_diagonal(cuadrado, acumulado, elemento_unico, pos_elemento_unico, tam, tope + 1);
-   arregla_acumulado(cuadrado, acumulado, cantidad_elementos, tam);
+   lemma_2(cuadrado, acumulado, tam, reduccion + 1, omitir);
+   lemma_1(cuadrado, acumulado, tam, reduccion + 1, omitir);
+   intercambia_diagonal(cuadrado, acumulado, elemento_unico, pos_elemento_unico, tam, reduccion + 1);
+   arregla_acumulado(cuadrado, acumulado, cantidad_elementos, tam, reduccion);
    omitir.pop_back( );
-   lemma_1(cuadrado, acumulado, tam, tope, omitir);
+   lemma_1(cuadrado, acumulado, tam, reduccion, omitir);
 }
 
 void resuelve(base::matrix<int, 2>& cuadrado, int tam, std::vector<std::pair<int, int>>& acumulado, std::vector<int>& cantidad_elementos, int caso, std::vector<int>& elementos_omitidos, std::vector<int>& elementos_unicos) {
